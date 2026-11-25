@@ -9,9 +9,7 @@ A local airline administration portal for the 14-relation `airline_management` M
 
 The masthead uses a local WebP generated with the built-in image-generation tool. [Open the artwork](static/img/flight-deck.webp).
 
-Generation prompt:
 
-> Use case: photorealistic-natural. Wide cinematic panoramic background for an aviation operations dashboard masthead. One modern unbranded white twin-engine passenger jet, close, seen from above and slightly ahead, nose angled to the lower left, wings spread toward upper corners, entire fuselage on the right two-thirds of the image. Flying over soft scattered pale blue cloud tops and distant dark navy mountainous terrain at blue hour, west-facing light glinting off the metal upper body, a rich cobalt twilight sky and atmospheric depth. A restrained aviation editorial photograph, precise anatomy, strong clear silhouette. Left third is naturally open dark blue air for a title overlay. Compose for a very wide 4:1 banner crop, airplane fits within the central horizontal band. No text, lettering, logos or watermarks.
 
 </details>
 
