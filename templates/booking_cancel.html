@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "booking_table.html" import booking_table %}
+{% block content %}
+<header class="page-head">
+  <div><p class="eyebrow">Passenger services</p><h1>Cancel booking</h1><p class="muted">Review the reservation before changing its status.</p></div>
+  <a class="btn" href="/bookings">Back to bookings</a>
+</header>
+<section class="panel">
+  <div class="panel-head"><h2>Reservation #{{ booking.booking_id }}</h2></div>
+  {{ booking_table([booking]) }}
+  <div class="form-body">
+    {% if booking.status|lower == 'cancelled' %}
+      <p class="notice">This booking has already been cancelled. Seat {{ booking.seat_no }} remains assigned to its record.</p>
+    {% else %}
+      <p class="notice">Cancelling this booking keeps the payment history and excludes the amount from confirmed revenue. Seat {{ booking.seat_no }} will stay attached to this record and cannot be assigned again on {{ booking.flight_id }}.</p>
+      <form class="form-actions" action="/bookings/{{ booking.booking_id }}/cancel" method="post"><button class="btn btn-danger" type="submit">Confirm cancellation</button><a class="btn" href="/bookings">Keep booking</a></form>
+    {% endif %}
+  </div>
+</section>
+{% endblock %}

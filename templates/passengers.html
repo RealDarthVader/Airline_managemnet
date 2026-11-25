@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-head">
+  <div><p class="eyebrow">Passenger services</p><h1>Passengers</h1><p class="muted">Find contact details and booking histories for registered passengers.</p></div>
+  <a class="btn btn-primary" href="/passengers/new">Register passenger</a>
+</header>
+<section class="panel" aria-labelledby="directory-title">
+  <div class="panel-head"><h2 id="directory-title">Passenger directory</h2><span class="muted">{{ records|length }} passenger{{ '' if records|length == 1 else 's' }}</span></div>
+  <form class="toolbar" method="get" action="/passengers">
+    <label class="field"><span>Search passengers</span><input type="search" name="q" value="{{ q }}" placeholder="Name, ID, email or phone"></label>
+    <button class="btn btn-primary" type="submit">Search</button>{% if q %}<a class="btn" href="/passengers">Clear</a>{% endif %}
+  </form>
+  {% if records %}
+    <div class="table-wrap"><table class="data-table">
+      <thead><tr><th>Passenger</th><th>Email address</th><th>Phone numbers</th><th>Confirmed bookings</th><th>Profile</th></tr></thead>
+      <tbody>{% for passenger in records %}<tr>
+        <td><strong>{{ passenger.name }}</strong><small class="cell-detail">#{{ passenger.passenger_id }}</small></td>
+        <td>{{ passenger.email }}</td><td>{% for phone in passenger.phones %}{{ phone }}{% if not loop.last %}<br>{% endif %}{% else %}<span class="muted">No phone listed</span>{% endfor %}</td>
+        <td>{{ passenger.confirmed|number }}</td><td><a href="/passengers/{{ passenger.passenger_id }}" aria-label="View profile for {{ passenger.name }}">View profile</a></td>
+      </tr>{% endfor %}</tbody>
+    </table></div>
+  {% else %}<div class="empty"><h3>No passengers found</h3><p>{% if q %}Try another name, email, phone number or passenger ID.{% else %}Register a passenger to add the first directory entry.{% endif %}</p></div>{% endif %}
+</section>
+{% endblock %}

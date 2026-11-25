@@ -1,0 +1,28 @@
+{% macro booking_table(records, show_passenger=true, allow_cancel=false) %}
+<div class="table-wrap">
+  <table class="data-table">
+    <thead>
+      <tr><th>Booking</th>{% if show_passenger %}<th>Passenger</th>{% endif %}<th>Flight</th><th>Seat / class</th><th>Payment</th><th>Status</th>{% if allow_cancel %}<th>Action</th>{% endif %}</tr>
+    </thead>
+    <tbody>
+      {% for booking in records %}
+      <tr>
+        <td><strong>#{{ booking.booking_id }}</strong><small class="cell-detail">{{ booking.booking_date|datefmt }}</small></td>
+        {% if show_passenger %}<td><a href="/passengers/{{ booking.passenger_id }}">{{ booking.name }}</a></td>{% endif %}
+        <td><a href="/flights/{{ booking.flight_id|pathpart }}">{{ booking.flight_id }}</a></td>
+        <td>{{ booking.seat_no }}<small class="cell-detail">{{ booking.ticket_class }}</small></td>
+        <td>{{ booking.amount_paid|money }}<small class="cell-detail">{{ booking.payment_method }}</small></td>
+        <td><span class="badge {{ booking.status|lower }}">{{ booking.status }}</span></td>
+        {% if allow_cancel %}
+        <td>{% if booking.status|lower != 'cancelled' %}<a href="/bookings/{{ booking.booking_id }}/cancel" aria-label="Cancel booking {{ booking.booking_id }}">Cancel</a>{% else %}<span class="muted">—</span>{% endif %}</td>
+        {% endif %}
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endmacro %}
+
+{% macro form_errors(errors) %}
+{% if errors %}<div class="notice error" role="alert"><strong>Check the following fields</strong><ul>{% for error in errors %}<li>{{ error }}</li>{% endfor %}</ul></div>{% endif %}
+{% endmacro %}

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<header class="page-head">
+  <div><p class="eyebrow"><a href="/flights">Flight schedule</a> / Flight details</p>
+    <h1>{{ flight.flight_id }}</h1><p class="muted">{{ flight.airline }} · {{ flight.model }} · {{ flight.aircraft_id }}</p>
+  </div>
+  {% if flight.available_seats %}<a class="btn btn-primary" href="/bookings/new?{{ {'flight_id': flight.flight_id}|urlencode }}">New booking</a>{% endif %}
+</header>
+
+<section class="panel" aria-labelledby="route-title">
+  <div class="panel-head"><h2 id="route-title">{{ flight.dep_code }} <span aria-label="to">→</span> {{ flight.arr_code }}</h2></div>
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>Leg</th><th>Airport</th><th>City</th><th>Scheduled time</th></tr></thead>
+    <tbody>
+      <tr><th scope="row">Departure</th><td>{{ flight.dep_airport }}</td><td>{{ flight.source_city }}</td><td>{{ flight.departure_time|datetimefmt }}</td></tr>
+      <tr><th scope="row">Arrival</th><td>{{ flight.arr_airport }}</td><td>{{ flight.destination_city }}</td><td>{{ flight.arrival_time|datetimefmt }}</td></tr>
+    </tbody>
+  </table></div>
+</section>
+<div class="kpis" aria-label="Seat allocation">
+  {% for label, value in [('Seating capacity', flight.capacity|number), ('Confirmed seats', flight.booked_seats|number), ('Available seats', flight.available_seats|number), ('Occupancy', flight.occupancy|string ~ '%')] %}
+  <div class="metric"><div class="metric-label">{{ label }}</div><strong class="metric-value">{{ value }}</strong></div>
+  {% endfor %}
+</div>
+<p class="table-note muted">Every assigned seat number stays reserved, including seats on pending and cancelled bookings.</p>
+
+<section class="panel" aria-labelledby="crew-title">
+  <div class="panel-head"><h2 id="crew-title">Assigned crew</h2><span class="muted">{{ crew|length }} assigned</span></div>
+  {% if crew %}
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>Staff ID</th><th>Staff name</th><th>Designation</th><th>Duty</th><th>Assignment date</th></tr></thead>
+    <tbody>{% for member in crew %}<tr><td>{{ member.staff_id }}</td><td>{{ member.name }}</td><td>{{ member.designation }}</td><td><span class="badge">{{ member.role }}</span></td><td>{{ member.assigned|datefmt }}</td></tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<div class="empty">No crew members have been assigned to this flight.</div>{% endif %}
+</section>
+<section class="panel" aria-labelledby="bookings-title">
+  <div class="panel-head"><h2 id="bookings-title">Booking records</h2><span class="muted">{{ bookings|length }} total</span></div>
+  {% if bookings %}
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>Booking ID</th><th>Passenger</th><th>Ticket class</th><th>Seat</th><th>Booked on</th><th>Status</th></tr></thead>
+    <tbody>{% for b in bookings %}<tr>
+      <td>#{{ b.booking_id }}</td><td><a href="/passengers/{{ b.passenger_id }}">{{ b.name }}</a></td><td>{{ b.cabin }}</td><td>{{ b.seat }}</td>
+      <td>{{ b.booked|datefmt }}</td><td><span class="badge {{ b.status|lower }}">{{ b.status }}</span></td>
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}<div class="empty">No bookings have been recorded for this flight.</div>{% endif %}
+</section>
+{% endblock %}

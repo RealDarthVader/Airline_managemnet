@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+{% from "booking_table.html" import booking_table %}
+{% block content %}
+<header class="page-head">
+  <div><p class="eyebrow">Passenger #{{ passenger.passenger_id }}</p><h1>{{ passenger.name }}</h1><p class="muted">Passenger profile and reservation history.</p></div>
+  <a class="btn" href="/passengers">Back to passengers</a>
+</header>
+{% if saved == 'registered' %}<p class="notice success" role="status">Passenger registered.</p>{% elif saved == 'updated' %}<p class="notice success" role="status">Contact details saved.</p>{% endif %}
+<section class="panel">
+  <div class="panel-head"><h2>Contact details</h2><a class="btn" href="/passengers/{{ passenger.passenger_id }}/edit">Edit contact</a></div>
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>Email address</th><th>Phone numbers</th><th>Confirmed bookings</th></tr></thead>
+    <tbody><tr><td>{{ passenger.email }}</td><td>{% for phone in passenger.phones %}{{ phone }}{% if not loop.last %}<br>{% endif %}{% else %}<span class="muted">No phone listed</span>{% endfor %}</td><td>{{ passenger.confirmed|number }}</td></tr></tbody>
+  </table></div>
+</section>
+<section class="panel">
+  <div class="panel-head"><h2>Booking history</h2><a class="btn" href="/bookings/new?passenger_id={{ passenger.passenger_id }}">New booking</a></div>
+  {% if bookings %}{{ booking_table(bookings, show_passenger=false) }}{% else %}<div class="empty"><h3>No bookings yet</h3><p>This passenger’s reservations will appear here.</p></div>{% endif %}
+</section>
+{% endblock %}

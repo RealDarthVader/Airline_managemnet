@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% from "booking_table.html" import form_errors %}
+{% block content %}
+<header class="page-head">
+  <div><p class="eyebrow">Passenger services</p><h1>New booking</h1><p class="muted">Assign a passenger, ticket and seat to a scheduled flight.</p></div>
+  <a class="btn" href="/bookings">Back to bookings</a>
+</header>
+{{ form_errors(errors) }}
+{% if not passengers or not flights or not tickets %}
+<div class="notice" role="status">
+  {% if not passengers %}A registered passenger is required. <a href="/passengers/new">Register passenger</a>. {% endif %}
+  {% if not flights %}Add a flight to the database before creating a booking. {% endif %}
+  {% if not tickets %}Add a ticket to the database before creating a booking.{% endif %}
+</div>
+{% endif %}
+<section class="panel">
+  <div class="panel-head"><h2>Reservation details</h2></div>
+  <form method="post" action="/bookings/new" class="form-body">
+    <div class="form-grid">
+      <label class="field"><span>Passenger</span>
+        <select name="passenger_id" required><option value="">Select passenger</option>
+          {% for item in passengers %}<option value="{{ item.passenger_id }}"{% if values.get('passenger_id','')|string == item.passenger_id|string %} selected{% endif %}>{{ item.name }} · #{{ item.passenger_id }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="field"><span>Flight</span>
+        <select name="flight_id" required><option value="">Select flight</option>
+          {% for item in flights %}<option value="{{ item.flight_id }}"{% if values.get('flight_id') == item.flight_id %} selected{% endif %}>{{ item.flight_id }} · {{ item.origin }} → {{ item.destination }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="field"><span>Ticket</span>
+        <select name="ticket_id" required><option value="">Select ticket</option>
+          {% for item in tickets %}<option value="{{ item.ticket_id }}"{% if values.get('ticket_id','')|string == item.ticket_id|string %} selected{% endif %}>#{{ item.ticket_id }} · {{ item.ticket_class }} · {{ item.price|money }}</option>{% endfor %}
+        </select>
+      </label>
+      <label class="field"><span>Seat number</span><input name="seat_no" required maxlength="8" placeholder="e.g. 12A" value="{{ values.get('seat_no', '') }}"></label>
+      <label class="field"><span>Amount paid (INR)</span><input name="amount_paid" type="number" inputmode="decimal" required min="0" max="99999999.99" step="0.01" value="{{ values.get('amount_paid','') }}"></label>
+      <label class="field"><span>Payment method</span><input name="payment_method" required maxlength="30" list="payment-methods" placeholder="Choose or enter a method" value="{{ values.get('payment_method','') }}">
+        <datalist id="payment-methods"><option value="Card"><option value="UPI"><option value="Net Banking"><option value="Cash"></datalist>
+      </label>
+      <label class="field"><span>Booking status</span><select name="status" required>
+        {% for status in ['Confirmed','Pending'] %}<option value="{{ status }}"{% if values.get('status') == status %} selected{% endif %}>{{ status }}</option>{% endfor %}
+      </select></label>
+    </div>
+    <p class="notice">Each flight and seat number can appear together only once. Pending and cancelled bookings also hold their seat numbers.</p>
+    <div class="form-actions"><button class="btn btn-primary" type="submit"{% if not passengers or not flights or not tickets %} disabled{% endif %}>Create booking</button><a class="btn" href="/bookings">Discard</a></div>
+  </form>
+</section>
+{% endblock %}

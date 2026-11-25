@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "booking_table.html" import form_errors %}
+{% block content %}
+<header class="page-head">
+  <div><p class="eyebrow">Passenger services</p><h1>{{ title }}</h1>
+    <p class="muted">{% if passenger %}Update the contact details for {{ passenger.name }} (passenger #{{ passenger.passenger_id }}).{% else %}Add a passenger to the directory before creating their first booking.{% endif %}</p>
+  </div>
+  <a class="btn" href="{% if passenger %}/passengers/{{ passenger.passenger_id }}{% else %}/passengers{% endif %}">{% if passenger %}Back to profile{% else %}Back to passengers{% endif %}</a>
+</header>
+{{ form_errors(errors) }}
+<section class="panel">
+  <div class="panel-head"><h2>{% if passenger %}Contact details{% else %}Passenger details{% endif %}</h2></div>
+  <form class="form-body" method="post" action="{% if passenger %}/passengers/{{ passenger.passenger_id }}/edit{% else %}/passengers/new{% endif %}">
+    <div class="form-grid">
+      {% if not passenger %}
+        <label class="field"><span>First name</span><input name="first_name" required maxlength="60" autocomplete="given-name" value="{{ values.get('first_name', '') }}"></label>
+        <label class="field"><span>Last name</span><input name="last_name" required maxlength="60" autocomplete="family-name" value="{{ values.get('last_name', '') }}"></label>
+      {% endif %}
+      <label class="field"><span>Email address</span><input name="email" type="email" required maxlength="150" autocomplete="email" value="{{ values.get('email','') }}"></label>
+      <label class="field"><span>Phone numbers <small class="muted">(optional)</small></span><textarea rows="3" name="phones" aria-describedby="phones-help">{{ values.get('phones', '') }}</textarea><small class="muted" id="phones-help">Enter one number per line, up to 20 characters each.</small></label>
+    </div>
+    <div class="form-actions">
+      <button class="btn btn-primary" type="submit">{% if passenger %}Save contact details{% else %}Register passenger{% endif %}</button>
+      <a class="btn" href="{% if passenger %}/passengers/{{ passenger.passenger_id }}{% else %}/passengers{% endif %}">Discard</a>
+    </div>
+  </form>
+</section>
+{% endblock %}

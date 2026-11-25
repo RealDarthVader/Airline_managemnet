@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% macro highlight(tokens) -%}
+{%- for kind, value in tokens -%}
+{%- if kind -%}<span class="sql-{{ kind }}">{{ value }}</span>{%- else -%}{{ value }}{%- endif -%}
+{%- endfor -%}
+{%- endmacro %}
+{% block head %}
+{{ super() }}
+<link rel="stylesheet" href="{{ url_for('static', path='css/explorer.css') }}">
+{% endblock %}
+{% block content %}
+<header class="page-head">
+  <div>
+    <div class="eyebrow">Database</div>
+    <h1>SQL Explorer</h1>
+    <p class="muted">Explore the schema through {{ demos|length }} queries and run them against MySQL.</p>
+  </div>
+</header>
+
+<form class="explorer-picker panel" action="/sql-explorer" method="get">
+  <label for="query-picker">Query library</label>
+  <div>
+    <select name="query" id="query-picker">
+      {% for item in demos %}
+      <option value="{{ item.number }}" {% if item.number == demo.number %}selected{% endif %}>{{ '%02d'|format(item.number) }} · {{ item.title }}</option>
+      {% endfor %}
+    </select>
+    <button class="btn" type="submit">Open</button>
+  </div>
+</form>
+
+<div class="explorer-layout">
+  <aside class="panel explorer-library">
+    <div class="panel-head"><h2>Query library</h2></div>
+    <nav class="query-links" aria-label="SQL demonstrations">
+      {% for item in demos %}
+      <a href="/sql-explorer?query={{ item.number }}" {% if item.number == demo.number %}aria-current="page"{% endif %}>
+        <span class="query-index">{{ '%02d'|format(item.number) }}</span><span>{{ item.title }}</span>
+      </a>
+      {% endfor %}
+    </nav>
+  </aside>
+
+  <div class="explorer-workspace">
+    <section class="panel query-panel" aria-labelledby="query-title">
+      <div class="explorer-intro">
+        <p class="eyebrow">Query {{ '%02d'|format(demo.number) }} of {{ demos|length }}</p>
+        <h2 id="query-title">{{ demo.title }}</h2>
+        <p class="muted">{{ demo.requirement }}</p>
+        <ul class="concepts" aria-label="SQL concepts">
+          {% for concept in demo.concepts %}<li>{{ concept }}</li>{% endfor %}
+        </ul>
+      </div>
+      <div class="query-source">
+        <div class="source-bar">
+          <span class="source-name"><span class="source-dot" aria-hidden="true"></span>Project.sql</span>
+          <button type="button" class="copy-query" data-copy="query-source" hidden>Copy SQL</button>
+        </div>
+        <pre tabindex="0" aria-label="SQL source"><code id="query-source">{{ highlight(tokens) }}</code></pre>
+      </div>
+      {% if demo.number == 17 %}
+      <details class="view-source">
+        <summary>View definition in Project.sql</summary>
+        <p class="muted">Run query reads the existing view. Its definition is shown here for reference.</p>
+        <div class="query-source">
+          <div class="source-bar"><span class="source-name">View definition</span>
+            <button type="button" class="copy-query" data-copy="view-definition" hidden>Copy definition</button>
+          </div>
+          <pre tabindex="0" aria-label="View definition"><code id="view-definition">{{ highlight(definition_tokens) }}</code></pre>
+        </div>
+      </details>
+      {% endif %}
+      <div class="query-actions">
+        <form action="/sql-explorer#results" method="get">
+          <input type="hidden" name="query" value="{{ demo.number }}">
+          <input type="hidden" name="run" value="true">
+          <button class="btn btn-primary" type="submit"><span class="play-symbol" aria-hidden="true"></span>Run query</button>
+        </form>
+        <span class="copy-feedback muted" aria-live="polite"></span>
+      </div>
+    </section>
+
+    <section class="panel result-panel" id="results" aria-labelledby="result-title" tabindex="-1">
+      <div class="panel-head">
+        <h2 id="result-title">Query results</h2>
+        {% if rows is not none %}<span class="result-stats">{{ rows|length }} {{ 'row' if rows|length == 1 else 'rows' }} <span>·</span> {{ '%.2f'|format(elapsed_ms) }} ms</span>{% endif %}
+      </div>
+      {% if missing_view %}
+      <div class="explorer-result-message" role="status">
+        <strong>Confirmed_Bookings is missing</strong>
+        <p>Select <code>airline_management</code> in MySQL Workbench and run the optional <code>sql/create_confirmed_bookings_view.sql</code> file to create this view. Then run query 17 again.</p>
+      </div>
+      {% elif rows is none %}
+      <div class="explorer-result-message"><p>Run this query to see its rows and execution time.</p></div>
+      {% else %}
+      <div class="table-wrap explorer-result-table">
+        <table class="data-table" aria-label="Result of {{ demo.title }}">
+          <thead><tr>{% for column in columns %}<th scope="col">{{ column }}</th>{% endfor %}</tr></thead>
+          <tbody>
+          {% for row in rows %}
+          <tr>{% for column in columns %}
+            <td>{% if row[column] is none %}<span class="muted">NULL</span>{% else %}{{ row[column] }}{% endif %}</td>
+          {% endfor %}</tr>
+          {% else %}
+          <tr><td colspan="{{ columns|length }}" class="muted">No records match this query.</td></tr>
+          {% endfor %}
+          </tbody>
+        </table>
+      </div>
+      {% endif %}
+    </section>
+  </div>
+</div>
+{% endblock %}
+{% block scripts %}
+{{ super() }}
+<script defer src="{{ url_for('static', path='js/explorer.js') }}"></script>
+{% endblock %}

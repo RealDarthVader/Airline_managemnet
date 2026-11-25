@@ -1,0 +1,32 @@
+{% from "icons.html" import icon %}
+{% macro report_charts(revenue, occupancy) %}
+<div class="chart-grid">
+  <section class="panel chart-card" aria-labelledby="revenue-title">
+    <div class="chart-head"><div><h2 id="revenue-title">Revenue by airline</h2><p>Share of confirmed booking revenue</p></div><span class="chart-glyph">{{ icon('pie') }}</span></div>
+    {% if revenue.rows %}
+    <div class="revenue-body">
+      <div class="donut" aria-hidden="true" style="--segments: {{ revenue.fill }}"><div><span>Airlines</span><strong>{{ revenue.rows|length }}</strong></div></div>
+      <ul class="chart-legend">
+      {% for row in revenue.rows %}<li><i style="--swatch: {{ row.color }}"></i><span class="legend-name">{{ row.airline }}<small>{{ '%.1f'|format(row.share) }}%</small></span><b>{{ row.revenue|money }}</b></li>{% endfor %}
+      </ul>
+    </div>
+    {% else %}<div class="empty">No airlines are registered.</div>{% endif %}
+  </section>
+  <section class="panel chart-card" aria-labelledby="occupancy-title">
+    <div class="chart-head"><div><h2 id="occupancy-title">Flight occupancy</h2><p>Top flights by confirmed seat occupancy</p></div><span class="chart-glyph">{{ icon('chart') }}</span></div>
+    {% if occupancy.rows %}
+    <div class="bar-chart" aria-label="Flight occupancy percentage">
+      <div class="y-axis" aria-hidden="true">{% for tick in occupancy.ticks %}<span>{{ '%g'|format(tick) }}%</span>{% endfor %}</div>
+      <div class="plot">
+        <div class="plot-grid" aria-hidden="true">{% for tick in occupancy.ticks %}<i></i>{% endfor %}</div>
+        <div class="bars">{% for f in occupancy.rows %}
+          <a href="/flights/{{ f.flight_id|pathpart }}" class="bar-column" style="--bar: {{ (f.occupancy * 100 / occupancy.ceiling)|round(4) }}%" aria-label="{{ f.flight_id }}, {{ f.occupancy }}% occupancy" title="{{ f.flight_id }} · {{ f.occupancy }}%">
+            <span class="bar"></span><span class="bar-label">{{ f.flight_id }}</span>
+          </a>
+        {% endfor %}</div>
+      </div>
+    </div>
+    {% else %}<div class="empty">No flights are scheduled.</div>{% endif %}
+  </section>
+</div>
+{% endmacro %}

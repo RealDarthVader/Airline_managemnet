@@ -1,0 +1,39 @@
+{% from "icons.html" import icon %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10151e">
+  <title>{{ title }} · AeroManage</title>
+  <link rel="icon" href="/static/img/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/static/css/style.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+  <a class="skip" href="#workspace">Skip to content</a>
+  <aside class="sidebar" id="navigation">
+    <a class="brand" href="/" aria-label="AeroManage overview"><img src="/static/img/mark.svg" alt="" width="37" height="37"><span>Aero<span class="brand-light">Manage</span><small>Airline management</small></span></a>
+    <nav aria-label="Main navigation">
+      {% for group, items in nav %}
+      <div class="nav-group"><p>{{ group }}</p>
+      {% for label, href, glyph in items %}
+        <a href="{{ href }}" {% if active_path == href %}class="active" aria-current="page"{% endif %}>{{ icon(glyph) }}<span>{{ label }}</span></a>
+      {% endfor %}
+      </div>{% endfor %}
+    </nav>
+    <div class="database-chip">{{ icon('database') }}<div><small>MySQL database</small><span>{{ database_name }}</span></div></div>
+  </aside>
+  <button type="button" class="nav-backdrop" aria-label="Close navigation"></button>
+  <div class="shell">
+    <header class="topbar">
+      <button class="menu-toggle icon-button" type="button" aria-controls="navigation" aria-expanded="false" aria-label="Open navigation">{{ icon('menu') }}</button>
+      <div class="breadcrumbs">{{ icon('layout') }}<span>Workspace</span><span class="crumb-slash">/</span><strong>{{ section_name }}</strong></div>
+      <div class="topbar-right"><time datetime="{{ today.isoformat() }}">{{ icon('calendar') }}{{ today.strftime('%a, %d %b %Y') }}</time><span class="team-mark" aria-label="AeroManage workspace">AM</span></div>
+    </header>
+    <main id="workspace" tabindex="-1">{% block content %}{% endblock %}</main>
+  </div>
+  <script src="/static/js/app.js" defer></script>
+  {% block scripts %}{% endblock %}
+</body>
+</html>

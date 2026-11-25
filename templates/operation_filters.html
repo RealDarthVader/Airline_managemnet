@@ -1,0 +1,11 @@
+{% macro select_filter(name, label, selected, options) %}
+<label class="field">
+  <span>{{ label }}</span>
+  <select name="{{ name }}">
+    <option value="">Any {{ label|lower }}</option>
+    {% for option in options %}
+    <option value="{{ option.value }}"{% if selected|string == option.value|string %} selected{% endif %}>{{ option.label }}</option>
+    {% endfor %}
+  </select>
+</label>
+{% endmacro %}

@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% from "operation_filters.html" import select_filter %}
+{% block content %}
+<header class="page-head">
+  <div><p class="eyebrow">Flight operations</p><h1>Flights</h1>
+    <p class="muted">Explore scheduled routes, aircraft assignments and seat availability.</p>
+  </div>
+</header>
+<section class="panel" aria-labelledby="schedule-title">
+  <div class="panel-head"><h2 id="schedule-title">Flight schedule</h2><span class="muted">{{ flights|length }} flight{{ '' if flights|length == 1 else 's' }}</span></div>
+  <form method="get" action="/flights" class="toolbar">
+    {{ select_filter('source', 'Source city', source, cities) }}
+    {{ select_filter('destination', 'Destination city', destination, cities) }}
+    <button class="btn btn-primary" type="submit">Apply filters</button>
+    {% if source != '' or destination != '' %}<a class="btn" href="/flights">Clear</a>{% endif %}
+  </form>
+  {% if flights %}
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr><th>Flight / airline</th><th>Aircraft</th><th>Departure</th><th>Arrival</th><th>Capacity</th><th>Booked</th><th>Available</th><th>Occupancy</th></tr></thead>
+    <tbody>
+    {% for f in flights %}
+    <tr>
+      <td><a href="/flights/{{ f.flight_id|urlencode }}"><strong>{{ f.flight_id }}</strong></a><small class="cell-detail">{{ f.airline }}</small></td>
+      <td>{{ f.model }}<small class="cell-detail">{{ f.aircraft_id }}</small></td>
+      <td><strong title="{{ f.dep_airport }}">{{ f.dep_code }}</strong> · {{ f.source_city }}<small class="cell-detail">{{ f.departure_time|datetimefmt }}</small></td>
+      <td><strong title="{{ f.arr_airport }}">{{ f.arr_code }}</strong> · {{ f.destination_city }}<small class="cell-detail">{{ f.arrival_time|datetimefmt }}</small></td>
+      <td>{{ f.capacity|number }}</td><td>{{ f.booked_seats|number }}</td><td>{{ f.available_seats|number }}</td><td>{{ f.occupancy }}%</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table></div>
+  {% else %}<div class="empty"><h3>No flights found</h3><p>{% if source != '' or destination != '' %}Try another city or clear the filters.{% else %}The flight schedule is empty.{% endif %}</p></div>{% endif %}
+</section>
+<p class="table-note muted">Booked seats and occupancy count confirmed bookings. Available seats exclude every seat number already assigned, including cancelled bookings.</p>
+{% endblock %}

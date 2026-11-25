@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "charts.html" import report_charts %}
+{% block content %}
+<section class="hero">
+  <div class="hero-image"></div>
+  <div class="hero-content">
+    <p class="hero-kicker"><span></span> Flight operations</p>
+    <h1>Operations overview</h1>
+    <p class="hero-description">Flight activity, bookings and revenue across your network.</p>
+    <a href="/bookings/new" class="hero-action">{{ icon('plus', 15) }} New booking</a>
+  </div>
+</section>
+
+<section class="kpis overview-kpis" aria-label="Network statistics">
+  <article class="metric"><div class="metric-top"><span class="metric-icon blue">{{ icon('fleet') }}</span><h2>Total flights</h2></div><strong class="metric-value">{{ summary.flights|number }}</strong><p>{{ summary.airlines|number }} airlines <span>·</span> {{ summary.aircraft|number }} aircraft</p></article>
+  <article class="metric"><div class="metric-top"><span class="metric-icon violet">{{ icon('users') }}</span><h2>Total passengers</h2></div><strong class="metric-value">{{ summary.passengers|number }}</strong><p>Registered in the network</p></article>
+  <article class="metric"><div class="metric-top"><span class="metric-icon mint">{{ icon('wallet') }}</span><h2>Confirmed revenue</h2></div><strong class="metric-value revenue-value" title="{{ summary.revenue|money }}">{{ summary.revenue|money_short }}</strong><p>{{ summary.confirmed|number }} confirmed bookings</p></article>
+  <article class="metric"><div class="metric-top"><span class="metric-icon amber">{{ icon('gauge') }}</span><h2>Avg. occupancy</h2></div><strong class="metric-value">{{ '%.2f'|format(summary.occupancy) }}<small>%</small></strong><p>Across scheduled flights</p></article>
+</section>
+{{ report_charts(revenue, occupancy) }}
+<section class="panel">
+  <div class="panel-head"><div><h2>Recent bookings</h2><p>{{ summary.confirmed|number }} confirmed <span>·</span> {{ summary.cancelled|number }} cancelled across all bookings</p></div><a class="text-link" href="/bookings">View bookings {{ icon('arrow', 15) }}</a></div>
+  {% if recent %}<div class="table-wrap"><table class="data-table"><thead><tr><th>Booking ID</th><th>Passenger</th><th>Flight</th><th>Seat</th><th>Amount paid</th><th>Status</th></tr></thead><tbody>
+  {% for row in recent %}<tr><td class="mono">#{{ row.booking_id }}</td><td><a class="person-link" href="/passengers/{{ row.passenger_id }}"><i class="avatar tint-{{ loop.index0 % 4 }}">{{ row.name|initials }}</i>{{ row.name }}</a></td><td><a class="flight-link" href="/flights/{{ row.flight_id|pathpart }}">{{ row.flight_id }}</a></td><td>{{ row.seat_no }}</td><td>{{ row.amount_paid|money }}</td><td><span class="badge {{ row.status|lower }}">{{ row.status }}</span></td></tr>{% endfor %}
+  </tbody></table></div>{% else %}<div class="empty">No bookings have been recorded. <a href="/bookings/new">Create a booking</a></div>{% endif %}
+</section>
+<section class="panel">
+  <div class="panel-head"><div><h2>Flight schedule</h2><p>Latest scheduled departures</p></div><a class="text-link" href="/flights">View flights {{ icon('arrow', 15) }}</a></div>
+  {% if schedule %}<div class="schedule-list">{% for f in schedule %}<a href="/flights/{{ f.flight_id|pathpart }}"><div><strong>{{ f.flight_id }}</strong><small>{{ f.airline }}</small></div><span class="route-pair">{{ f.dep_code }} {{ icon('arrow', 14) }} {{ f.arr_code }}</span><time>{{ f.departure_time|datetimefmt }}</time></a>{% endfor %}</div>{% else %}<div class="empty">No flights are scheduled.</div>{% endif %}
+</section>
+{% endblock %}

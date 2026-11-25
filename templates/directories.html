@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "operation_filters.html" import select_filter %}
+{% macro service(included) %}<span class="{{ 'service-included' if included else 'muted' }}">{{ 'Included' if included else 'Not included' }}</span>{% endmacro %}
+{% block content %}
+<header class="page-head">
+  <div><p class="eyebrow">{{ 'Flight operations' if section in ('aircraft', 'crew') else 'Directory' }}</p><h1>{{ title }}</h1><p class="muted">{{ subtitle }}</p></div>
+</header>
+<section class="panel" aria-labelledby="directory-title">
+  <div class="panel-head">
+    <h2 id="directory-title">{{ {'aircraft':'Aircraft fleet', 'crew':'Crew roster', 'tickets':'Ticket catalogue', 'airports':'Airport directory', 'administrators':'Administrator directory'}[section] }}</h2>
+    <span class="muted">{{ rows|length }} record{{ '' if rows|length == 1 else 's' }}</span>
+  </div>
+  {% if filters %}
+  <form class="toolbar" method="get" action="/{{ section }}">
+    {% for name, label, selected, options in filters %}{{ select_filter(name, label, selected, options) }}{% endfor %}
+    <button type="submit" class="btn btn-primary">Apply filters</button>
+    {% if request.url.query %}<a class="btn" href="/{{ section }}">Clear</a>{% endif %}
+  </form>
+  {% endif %}
+  {% if rows %}
+  <div class="table-wrap"><table class="data-table">
+    <thead><tr>{% for heading in headings %}<th scope="col">{{ heading }}</th>{% endfor %}</tr></thead>
+    <tbody>{% for row in rows %}<tr>
+      {% if section == 'aircraft' %}
+      <td><strong>{{ row.aircraft_id }}</strong></td><td>{{ row.airline }}</td><td>{{ row.model }}</td>
+      <td>{{ row.capacity|number }}</td><td>{{ "{:,.2f}".format(row.weight) }}</td><td><strong>{{ row.airport_code }}</strong><small class="cell-detail">{{ row.airport }}</small></td>
+      {% elif section == 'crew' %}
+      <td>{{ row.staff_id }}</td><td><strong>{{ row.name }}</strong></td><td>{{ row.designation }}</td>
+      <td>{% if row.flight_id %}<a href="/flights/{{ row.flight_id|urlencode }}">{{ row.flight_id }}</a>{% else %}<span class="muted">Unassigned</span>{% endif %}</td>
+      <td>{{ row.assigned|datefmt if row.assigned else '—' }}</td><td>{% if row.role %}<span class="badge">{{ row.role }}</span>{% else %}—{% endif %}</td>
+      {% elif section == 'tickets' %}
+      <td>{{ row.ticket_id }}</td><td><strong>{{ row.cabin }}</strong></td><td>{{ row.fare|money }}</td>
+      <td>{{ ("%.2f"|format(row.discount)).rstrip('0').rstrip('.') }}%</td><td>{{ service(row.luggage) }}</td><td>{{ service(row.flexible) }}</td><td>{{ service(row.meals) }}</td>
+      {% elif section == 'airports' %}
+      <td><strong>{{ row.code }}</strong></td><td>{{ row.airport }}</td><td>{{ row.city }}</td><td>{{ row.country }}</td>
+      {% elif section == 'administrators' %}
+      <td>{{ row.admin_id }}</td><td><strong>{{ row.name }}</strong></td><td>{{ row.email }}{% if row.phone %}<small class="cell-detail">{{ row.phone }}</small>{% endif %}</td>
+      <td><strong>{{ row.airport_code }}</strong><small class="cell-detail">{{ row.airport }}</small></td>
+      <td>{% for flight_id in row.flights %}<a href="/flights/{{ flight_id|urlencode }}">{{ flight_id }}</a>{{ ', ' if not loop.last }}{% else %}<span class="muted">No assigned flights</span>{% endfor %}</td>
+      {% endif %}
+    </tr>{% endfor %}</tbody>
+  </table></div>
+  {% else %}
+  <div class="empty"><h3>No records found</h3><p>{% if request.url.query and filters %}Try another filter or clear your selection.{% else %}There are no records in this directory.{% endif %}</p></div>
+  {% endif %}
+</section>
+{% endblock %}

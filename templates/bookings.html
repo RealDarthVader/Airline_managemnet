@@ -1,0 +1,28 @@
+{% extends "base.html" %}
+{% from "booking_table.html" import booking_table %}
+{% block content %}
+<header class="page-head">
+  <div><p class="eyebrow">Passenger services</p><h1>Bookings</h1><p class="muted">Manage reservations, seat assignments and payments.</p></div>
+  <a class="btn btn-primary" href="/bookings/new">New booking</a>
+</header>
+{% if created is not none %}<p class="notice success" role="status">Booking #{{ created }} was created.</p>{% endif %}
+{% if cancelled is not none %}<p class="notice success" role="status">Booking #{{ cancelled }} is cancelled. Its seat number remains reserved.</p>{% endif %}
+<section class="panel" aria-labelledby="records-title">
+  <div class="panel-head"><h2 id="records-title">Booking records</h2><span class="muted">{{ records|length }} result{{ '' if records|length == 1 else 's' }}</span></div>
+  <form class="toolbar" method="get" action="/bookings">
+    <label class="field"><span>Search</span><input type="search" name="q" placeholder="Passenger, booking, flight or seat" value="{{ q }}"></label>
+    <label class="field"><span>Status</span><select name="status">
+      <option value="">All statuses</option>
+      {% for item in statuses %}<option value="{{ item }}"{% if status == item %} selected{% endif %}>{{ item }}</option>{% endfor %}
+    </select></label>
+    <label class="field"><span>Flight</span><select name="flight">
+      <option value="">All flights</option>
+      {% for item in flights %}<option value="{{ item.flight_id }}"{% if flight == item.flight_id %} selected{% endif %}>{{ item.flight_id }} · {{ item.origin }} → {{ item.destination }}</option>{% endfor %}
+    </select></label>
+    <button class="btn btn-primary" type="submit">Apply filters</button>
+    {% if q or status or flight %}<a class="btn" href="/bookings">Clear</a>{% endif %}
+  </form>
+  {% if records %}{{ booking_table(records, allow_cancel=true) }}
+  {% else %}<div class="empty"><h3>No bookings found</h3><p>{% if q or status or flight %}Try changing your search or clearing the filters.{% else %}Create a booking to add the first reservation.{% endif %}</p></div>{% endif %}
+</section>
+{% endblock %}

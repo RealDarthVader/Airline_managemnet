@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+{% if status_code == 503 and active_path == '/' %}
+<section class="hero">
+  <div class="hero-image"></div>
+  <div class="hero-content"><p class="hero-kicker"><span></span> Flight operations</p>
+    <h1>Operations overview</h1>
+    <p class="hero-description">Connect the project database to load your network statistics.</p>
+    <a class="hero-action" href="/sql-explorer">{{ icon('code', 16) }} Open SQL Explorer</a>
+  </div>
+</section>
+{% endif %}
+<section class="panel error-panel">
+  <span class="metric-icon violet">{{ icon('info', 23) }}</span>
+  <p class="eyebrow">{{ 'MySQL connection' if status_code == 503 else 'Request ' ~ status_code }}</p>
+  {% if status_code == 503 and active_path == '/' %}<h2>{{ title }}</h2>{% else %}<h1>{{ title }}</h1>{% endif %}
+  <p class="muted">{{ message }}</p>
+  {% if status_code == 503 %}
+    <p class="muted">Changes saved to .env apply on the next request.</p>
+    {% if request.method == 'GET' %}<a class="btn btn-primary" href="{{ request.url.path }}{% if request.url.query %}?{{ request.url.query }}{% endif %}">Retry connection</a>{% else %}<a class="btn" href="/">Back to overview</a>{% endif %}
+    {% if active_path != '/' %}<a class="btn" href="/sql-explorer">Open query library</a>{% endif %}
+  {% else %}<a class="btn" href="/">Back to overview</a>{% endif %}
+</section>
+{% endblock %}
